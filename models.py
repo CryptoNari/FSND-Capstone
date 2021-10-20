@@ -36,6 +36,7 @@ class Test(db.Model):
 
   id = Column(Integer(), primary_key=True)
   name = Column(String)
+  test = Column(String)
 
   def __init__(self, name):
     self.name = name
