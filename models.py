@@ -5,6 +5,13 @@ import json
 
 database_path = os.environ['DATABASE_URL']
 
+print(database_path)
+
+if database_path[:10] != 'postgresql':
+    database_path = database_path.replace('postgres', 'postgresql')
+
+print(database_path)
+
 db = SQLAlchemy()
 
 
