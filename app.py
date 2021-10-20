@@ -8,7 +8,7 @@ def create_app(test_config=None):
   app = Flask(__name__)
   CORS(app)
 
-  @app.route('/', method={'GET'})
+  @app.route('/', methods={'GET'})
   def home():
     
     return jsonify({
