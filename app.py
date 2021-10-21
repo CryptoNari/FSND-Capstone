@@ -94,13 +94,13 @@ def create_app(test_config=None):
         }), 500
 
 
-    @app.errorhandler(AuthError)
+    """ @app.errorhandler(AuthError)
     def server_error(error):
         return jsonify({
             "success": False,
             "error": error.status_code,
             "message": error.description
-        }), error.status_code
+        }), error.status_code """
 
     return app
 
