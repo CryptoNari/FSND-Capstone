@@ -5,8 +5,8 @@ from sqlalchemy.schema import ForeignKey
 from sqlalchemy.orm import relationship
 import json
 
-database_path ='postgresql://postgres:postgres@localhost:5432/capstone'
-# database_path = os.environ['DATABASE_URL']
+# database_path ='postgresql://postgres:postgres@localhost:5432/capstone'
+database_path = os.environ['DATABASE_URL']
 
 
 
