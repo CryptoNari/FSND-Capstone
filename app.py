@@ -1,15 +1,20 @@
 import os
+import sys
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from models import Podcast, Speaker, Episode, setup_db
+from tests.sample import reset_db_tables                    
+
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
     setup_db(app)
     app.config['JSON_SORT_KEYS'] = False
-  
+
+    reset_db_tables(app) # delete tables and fill with sample data
+    
     '''
     Set up CORS
     '''

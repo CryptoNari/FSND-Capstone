@@ -44,14 +44,18 @@ class Podcast(db.Model):
     __tablename__ = 'podcasts'
 
     id = Column(Integer, primary_key=True)
+    author = Column(String)
     name = Column(String)
     image_link = Column(String(500))
     podcast_link = Column(String(120))
     speakers = relationship('Speaker', secondary='episodes',backref='podcasts', viewonly=True)
     episodes = relationship('Episode', viewonly=True)
 
-    def __init__(self, name):
+    def __init__(self, author, name, image, podcast_link):
+        self.author = author
         self.name = name
+        self.image_link = image
+        self.podcast_link = podcast_link
 
     def insert(self):
         db.session.add(self)
@@ -67,6 +71,7 @@ class Podcast(db.Model):
     def format(self):
         return {
             'id': self.id,
+            'author': self.author,
             'name': self.name,
             'image': self.image_link,
             'podcast_link': self.podcast_link,
@@ -87,12 +92,14 @@ class Speaker(db.Model):
     image_link = Column(String(500))
     twitter_link = Column(String(120))
     website_link = Column(String(120))
-#    podcasts = relationship('Podcast', secondary='episodes',backref='speakers', viewonly=True)
     episodes = relationship('Episode', viewonly=True)
 
-    def __init__(self, name):
+    def __init__(self, name, image, twitter, website):
         self.name = name
-    
+        self.image_link = image
+        self.twitter_link = twitter
+        self.website_link = website
+
     def insert(self):
         db.session.add(self)
         db.session.commit()
@@ -125,6 +132,7 @@ class Episode(db.Model):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     topics = Column(String)
+    podcast_link = Column(String)
     speaker_id = Column(Integer, ForeignKey('speakers.id'), nullable=False)
     speaker_name = relationship('Speaker', viewonly=True)
     podcast_id = Column(Integer, ForeignKey('podcasts.id'), nullable=False)
@@ -132,8 +140,10 @@ class Episode(db.Model):
     # start_time = Column(DateTime())
     # finished = Column(Boolean, default=False, nullable=False)
 
-    def __init__(self, title, podcast_id, speaker_id):
+    def __init__(self, title, topics, link, podcast_id, speaker_id):
         self.title = title
+        self.topics = topics
+        self.podcast_link = link
         self.speaker_id = speaker_id
         self.podcast_id = podcast_id
 
@@ -153,6 +163,7 @@ class Episode(db.Model):
             'id': self.id,
             'title': self.title,
             'topics': self.topics,
+            'podcast_link': self.podcast_link,
             'speaker-id': self.speaker_id,
             'speaker_name': self.speaker_name.name,
             'podcast-id': self.podcast_id,
