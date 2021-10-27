@@ -6,7 +6,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 sys.path.insert(0, '..') # change path to import from parent dir
 
-
 from app import create_app
 from models import test_setup_db, Podcast, Speaker, Episode
 
@@ -49,6 +48,28 @@ class CapstoneTestCase(unittest.TestCase):
         test = Podcast.query.first()
       
         self.assertEqual(test.name, 'Test Podcast')
+
+    def test_get_podcasts(self):
+        res = self.client().get('/podcasts')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_get_speakers(self):
+        res = self.client().get('/speakers')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_get_episodes(self):
+        res = self.client().get('/episodes')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
     
+
 if __name__ == "__main__":
     unittest.main()

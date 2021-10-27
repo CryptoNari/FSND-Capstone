@@ -2,12 +2,13 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from models import setup_db
+from models import Podcast, Speaker, Episode, setup_db
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
     setup_db(app)
+    app.config['JSON_SORT_KEYS'] = False
   
     '''
     Set up CORS
@@ -35,6 +36,48 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'message': 'Healthy'
+        })
+
+    @app.route('/podcasts', methods={'GET'})
+    def get_podcasts():
+        query = Podcast.query.all()
+        print('-------Query Podcasts-------')
+        print(query)
+        podcasts = [podcast.format() for podcast in query]
+        print('-------Formatted Podcasts-------')
+        print(podcasts)
+    
+        return jsonify({
+            'success': True,
+            'podcasts': podcasts
+        })
+
+    @app.route('/speakers', methods={'GET'})
+    def get_speakers():
+        query = Speaker.query.all()
+        print('-------Query Speakers-------')
+        print(query)
+        speakers = [speaker.format() for speaker in query]
+        print('-------Formatted Speakers-------')
+        print(speakers)
+    
+        return jsonify({
+            'success': True,
+            'speakers': speakers
+        })
+
+    @app.route('/episodes', methods={'GET'})
+    def get_episodes():
+        query = Episode.query.all()
+        print('-------Query Episodes-------')
+        print(query)
+        episodes = [episode.format() for episode in query]
+        print('-------Formatted Episodes-------')
+        print(episodes)
+    
+        return jsonify({
+            'success': True,
+            'episodes': episodes
         })
 
     '''

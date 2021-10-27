@@ -69,9 +69,9 @@ class Podcast(db.Model):
             'id': self.id,
             'name': self.name,
             'image': self.image_link,
-            'podcast': self.podcast_link,
-            'speakers': self.speakers,
-            'episodes': self.episodes
+            'podcast_link': self.podcast_link,
+            'speakers': len(self.speakers),
+            'episodes': len(self.episodes)
     } 
 
 '''
@@ -111,8 +111,7 @@ class Speaker(db.Model):
             'image': self.image_link,
             'twitter': self.twitter_link,
             'website': self.website_link,
- #           'podcasts': self.podcasts,
-            'Episode': self.episodes
+            'episodes': len(self.episodes)
         }
 
 '''
