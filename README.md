@@ -82,7 +82,8 @@ python app.py
 
 ### Endpoints
 
-- GET /podcasts, /speakers and /episodes
+- Healthcheck GET '/'
+- GET '/podcasts', '/speakers' and '/episodes'
 
 
 ## API Reference
@@ -142,3 +143,78 @@ For local testin you have to replace it with the Local hosted Url.
     "message":"Healthy"
 }
 ```
+
+#### GET ('/podcasts')
+- General:
+    - Fetches all podcasts and counts speakers and episodes per podcast
+    - Request Arguments: None
+- Sample:
+    - `curl https://fsnd-capstone2021.herokuapp.com/podcasts`
+
+- Returns:
+```
+{
+    "success":true,
+    "podcasts":[{
+        "id":10,
+        "author":"Robert Breedlove",
+        "name":"The 'What is money?' Show",
+        "image":"https://production.listennotes.com/podcasts/the-what-is-money-show-robert-breedlove-LZHEONsqo51-4XBAzvpCmj0.1400x1400.jpg",
+        "podcast_link":"https://open.spotify.com/show/25LPvm8EewBGyfQQ1abIsE",
+        "speakers":2,
+        "episodes":2
+        },
+        ...
+    ]
+}
+```
+
+#### GET ('/speakers')
+- General:
+    - Fetches all speakers and counts episodes per speaker 
+    - Request Arguments: None
+- Sample:
+    - `curl https://fsnd-capstone2021.herokuapp.com/speakers`
+
+- Returns:
+```
+{
+    "success":true,
+    "speakers":[{
+        "id":10,
+        "name":"Michael Saylor",
+        "image":"https://unchainedpodcast.com/wp-content/uploads/2021/01/Michael_Saylor.jpg",
+        "twitter":"https://twitter.com/saylor",
+        "website":"https://www.hope.com",
+        "episodes":2},
+        ...
+    ]
+}
+```
+
+#### GET ('/episodes')
+- General:
+    - Fetches all episodes and gets podcast and speaker name
+    - Request Arguments: None
+- Sample:
+    - `curl https://fsnd-capstone2021.herokuapp.com/episodes`
+
+- Returns:
+```
+{
+    "success":true,
+    "episodes":[{
+        "id":13,
+        "title":"The Saylor Series | Episode 1",
+        "topics":"Bitcoin"
+        ,"podcast_link":"https://open.spotify.com/episode/5vTqGVN513uTGX1yXcKzJu",
+        "speaker-id":10,
+        "speaker_name":"Michael Saylor",
+        "podcast-id":10,
+        "podcast_name":"The 'What is money?' Show"
+        },
+        ...
+    ]
+}
+```
+
