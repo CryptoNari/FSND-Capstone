@@ -13,7 +13,7 @@ def create_app(test_config=None):
     setup_db(app)
     app.config['JSON_SORT_KEYS'] = False
 
-    # reset_db_tables(app) # delete tables and fill with sample data
+    reset_db_tables(app) # delete tables and fill with sample data
     
     '''
     Set up CORS
