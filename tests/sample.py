@@ -10,28 +10,22 @@ def get_podcast_id(author):
     return podcast_id
 
 def get_speaker_id(speaker):
-    print('-----------------------------------------------------------------------------------')
-    print(speaker)
     query = Speaker.query.filter(Speaker.name==speaker).first()
-    print(query.format())
     speaker_id = query.id
     return speaker_id
 
 def reset_db_tables(self):
     query = Episode.query.all()
-    if query:
-        for episode in query:
-            episode.delete()
+    for episode in query:
+        episode.delete()
     
     query = Podcast.query.all()
-    if query:
-        for podcast in query:
-            podcast.delete()
+    for podcast in query:
+        podcast.delete()
 
     query = Speaker.query.all()
-    if query:
-        for speaker in query:
-            speaker.delete()
+    for speaker in query:
+        speaker.delete()
     
     insert_podcast_sample_data(self)
     insert_speaker_sample_data(self)
