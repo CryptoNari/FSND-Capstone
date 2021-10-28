@@ -13,7 +13,7 @@ def create_app(test_config=None):
     setup_db(app)
     app.config['JSON_SORT_KEYS'] = False
 
-    reset_db_tables(app) # delete tables and fill with sample data
+    # reset_db_tables(app) # delete tables and fill with sample data
     
     '''
     Set up CORS
@@ -59,12 +59,16 @@ def create_app(test_config=None):
     @app.route('/podcasts/<int:podcast_id>', methods={'GET'})
     def get_podcast_id(podcast_id):
         query = Podcast.query.filter(Podcast.id == podcast_id).one_or_none()
-        podcast = query.format()
+        
+        if query:
+            podcast = query.format()
+            return jsonify({
+                'success': True,
+                'podcasts': podcast
+            })
+        else:
+            abort(404)
 
-        return jsonify({
-            'success': True,
-            'podcasts': podcast
-        })
 
     @app.route('/speakers', methods={'GET'})
     def get_speakers():
@@ -75,16 +79,21 @@ def create_app(test_config=None):
             'success': True,
             'speakers': speakers
         })
+
     
     @app.route('/speakers/<int:speaker_id>', methods={'GET'})
     def get_speaker_id(speaker_id):
         query = Speaker.query.filter(Speaker.id == speaker_id).one_or_none()
-        speaker = query.format()
+        
+        if query:
+            speaker = query.format()
+            return jsonify({
+                'success': True,
+                'podcasts': speaker
+            })
+        else:
+            abort(404)
 
-        return jsonify({
-            'success': True,
-            'podcasts': speaker
-        })
 
     @app.route('/episodes', methods={'GET'})
     def get_episodes():
@@ -95,16 +104,21 @@ def create_app(test_config=None):
             'success': True,
             'episodes': episodes
         })
+
     
     @app.route('/episodes/<int:episode_id>', methods={'GET'})
     def get_episode_id(episode_id):
         query = Episode.query.filter(Episode.id == episode_id).one_or_none()
-        episode = query.format()
-
-        return jsonify({
-            'success': True,
-            'podcasts': episode
-        })
+        
+        if query:
+            episode = query.format()
+            return jsonify({
+                'success': True,
+                'podcasts': episode
+            })
+        else:
+            abort(404)
+        
 
     '''
     POST Endpoints
@@ -121,23 +135,25 @@ def create_app(test_config=None):
 
         try:
             if search:
-                # Search in author and name in Podcasts
+                # Search in Podcasts for author and name
                 query_author = (
                     Podcast.query
                     .filter(Podcast.author.ilike("%{}%".format(search)))
                 )
-                
+                author_results = [podcast.format() for podcast in query_author]
+
                 query_name = (
                     Podcast.query
                     .filter(Podcast.name.ilike("%{}%".format(search)))
                 )
+                name_results = [podcast.format() for podcast in query_name]
 
-                search_count = len(query_name)+len(query_author)
+                search_count = len(name_results)+len(author_results)
 
                 result = {
                     'success': True,
-                    'author_search': query_author,
-                    'name_search': query_name,
+                    'author_search': author_results,
+                    'name_search': name_results,
                     'results': search_count
                 }
             else:
@@ -149,7 +165,58 @@ def create_app(test_config=None):
                 podcast.insert()
                 result = {
                     'success': True,
-                    'question': podcast.format()
+                    'podcast': podcast.format()
+                }
+
+        except IndexError:
+            db.session.rollback()
+            print(sys.exc_info())
+            abort(422)
+
+        finally:
+            db.session.close()
+
+        return jsonify(result)
+
+
+    @app.route('/speakers', methods=['POST'])
+    def create_search_speaker():
+        body = request.get_json()
+        new_name = body.get('name', None)
+        new_image_link = body.get('image', None)
+        new_twitter_link = body.get('twitter', None)
+        new_website_link = body.get('website', None)
+        search = body.get('search', None)
+
+        try:
+            if search:
+                # Search in Speakers for names
+                
+                query_name = (
+                    Speaker.query
+                    .filter(Speaker.name.ilike("%{}%".format(search)))
+                )
+                name_results = [speaker.format() for speaker in query_name]
+
+                search_count = len(name_results)
+
+                result = {
+                    'success': True,
+                    'name_search': name_results,
+                    'results': search_count
+                }
+            else:
+                # POST a new question
+                speaker = Speaker(
+                    name=new_name,
+                    image=new_image_link,
+                    twitter=new_twitter_link,
+                    website=new_website_link
+                )
+                speaker.insert()
+                result = {
+                    'success': True,
+                    'speaker': speaker.format()
                 }
 
         except IndexError:
@@ -163,6 +230,236 @@ def create_app(test_config=None):
         return jsonify(result)
 
     
+    @app.route('/episodes', methods=['POST'])
+    def create_search_episodes():
+        body = request.get_json()
+        new_title = body.get('title', None)
+        new_topics = body.get('topics', None)
+        new_podcast_link = body.get('link', None)
+        new_speaker_id = body.get('speaker_id', None)
+        new_podcast_id = body.get('podcast_id', None)
+        search = body.get('search', None)
+
+        try:
+            if search:
+                # Search in Episodes for titles and topics
+                
+                query_title = (
+                    Episode.query
+                    .filter(Episode.title.ilike("%{}%".format(search)))
+                )
+                title_results = [episode.format() for episode in query_title]
+
+                query_topics = (
+                    Episode.query
+                    .filter(Episode.topics.ilike("%{}%".format(search)))
+                )
+                topics_results = [episode.format() for episode in query_topics]
+
+                search_count = len(title_results)+len(topics_results)
+
+                result = {
+                    'success': True,
+                    'title_search': title_results,
+                    'topics_search': topics_results,
+                    'results': search_count
+                }
+            else:
+                # POST a new question
+                episode = Episode(
+                    title=new_title,
+                    topics=new_topics,
+                    link=new_podcast_link,
+                    speaker_id=new_speaker_id,
+                    podcast_id=new_podcast_id
+                )
+                episode.insert()
+                result = {
+                    'success': True,
+                    'episode': episode.format()
+                }
+
+        except IndexError:
+            db.session.rollback()
+            print(sys.exc_info())
+            abort(422)
+
+        finally:
+            db.session.close()
+
+        return jsonify(result)
+
+    '''
+    DELETE Endpoints
+    '''
+
+    @app.route('/podcasts/<int:podcast_id>', methods=['DELETE'])
+    def delete_podcast(podcast_id):
+        try:
+            podcast = Podcast.query.get(podcast_id)
+            podcast.delete()
+            result = {
+              'success': True,
+            }
+        except IndexError:
+            db.session.rollback()
+            print(sys.exc_info())
+            if podcast is None:
+                abort(404)
+            else:
+                abort(422)
+
+        finally:
+            db.session.close()
+
+        return jsonify(result)
+        
+
+    @app.route('/speakers/<int:speaker_id>', methods=['DELETE'])
+    def delete_speaker(speaker_id):
+        try:
+            speaker = Speaker.query.get(speaker_id)
+            speaker.delete()
+            result = {
+              'success': True,
+            }
+        except IndexError:
+            db.session.rollback()
+            print(sys.exc_info())
+            if speaker is None:
+                abort(404)
+            else:
+                abort(422)
+
+        finally:
+            db.session.close()
+
+        return jsonify(result)
+
+    @app.route('/episodes/<int:episode_id>', methods=['DELETE'])
+    def delete_episode(episode_id):
+        try:
+            episode = Episode.query.get(episode_id)
+            episode.delete()
+            result = {
+              'success': True,
+            }
+        except IndexError:
+            db.session.rollback()
+            print(sys.exc_info())
+            if episode is None:
+                abort(404)
+            else:
+                abort(422)
+
+        finally:
+            db.session.close()
+
+        return jsonify(result)
+
+    '''
+    PATCH Endpoints
+    '''
+    @app.route('/podcasts/<int:podcast_id>', methods=['PATCH'])
+    def update_podcast(podcast_id):
+        body = request.get_json()
+        new_author = body.get('author', None)
+        new_name = body.get('name', None)
+        new_image = body.get('image', None)
+        new_podcast_link = body.get('podcast_link', None)
+        
+
+        try:
+            podcast = Podcast.query.get(podcast_id)
+            podcast.author = new_author
+            podcast.name = new_name
+            podcast.image = new_image
+            podcast.podcast_link = new_podcast_link
+            
+            result = {
+              'success': True,
+              'podcast': podcast.format()
+            }
+        except IndexError:
+            db.session.rollback()
+            print(sys.exc_info())
+            if podcast is None:
+                abort(404)
+            else:
+                abort(422)
+
+        finally:
+            db.session.close()
+
+        return jsonify(result)
+
+
+    @app.route('/speakers/<int:speaker_id>', methods=['PATCH'])
+    def update_speaker(speaker_id):
+        body = request.get_json()
+        new_name = body.get('name', None)
+        new_image = body.get('image', None)
+        new_twitter = body.get('twitter', None)
+        new_website = body.get('website', None)
+        
+
+        try:
+            speaker = Speaker.query.get(speaker_id)
+            speaker.name = new_name
+            speaker.image = new_image
+            speaker.twitter = new_twitter
+            speaker.website = new_website
+            
+            result = {
+              'success': True,
+              'speaker': speaker.format()
+            }
+        except IndexError:
+            db.session.rollback()
+            print(sys.exc_info())
+            if speaker is None:
+                abort(404)
+            else:
+                abort(422)
+
+        finally:
+            db.session.close()
+
+        return jsonify(result)
+    
+    @app.route('/episodes/<int:episode_id>', methods=['PATCH'])
+    def update_episode(episode_id):
+        body = request.get_json()
+        new_title = body.get('title', None)
+        new_topics = body.get('topics', None)
+        new_podcast_link = body.get('link', None)
+        new_speaker_id = body.get('speaker_id', None)
+        new_podcast_id = body.get('podcast_id', None)
+
+        try:
+            episode = Episode.query.get(episode_id)
+            episode.title = new_title
+            episode.topics = new_topics
+            episode.link = new_podcast_link
+            episode.speaker_id = new_speaker_id
+            episode.podcast_id = new_podcast_id
+            result = {
+              'success': True,
+              'episode': episode.format()
+            }
+        except IndexError:
+            db.session.rollback()
+            print(sys.exc_info())
+            if episode is None:
+                abort(404)
+            else:
+                abort(422)
+
+        finally:
+            db.session.close()
+
+        return jsonify(result)
+
 
     '''
     Error handlers for expected errors
