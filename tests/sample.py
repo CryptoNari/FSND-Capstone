@@ -118,5 +118,5 @@ def insert_episode_sample_data(self):
         speaker_id=get_speaker_id('Jeff Booth'),
         podcast_id=get_podcast_id('Robert Breedlove')
         )
-    episode.insert()
+    
         

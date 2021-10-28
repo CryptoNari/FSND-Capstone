@@ -3,7 +3,7 @@ import sys
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from models import Podcast, Speaker, Episode, setup_db
+from models import Podcast, Speaker, Episode, setup_db, db
 from tests.sample import reset_db_tables                    
 
 
@@ -35,6 +35,9 @@ def create_app(test_config=None):
         )
         return response
 
+    '''
+    GET Endpoints
+    '''
 
     @app.route('/', methods={'GET'})
     def home():
@@ -46,44 +49,120 @@ def create_app(test_config=None):
     @app.route('/podcasts', methods={'GET'})
     def get_podcasts():
         query = Podcast.query.all()
-        print('-------Query Podcasts-------')
-        print(query)
         podcasts = [podcast.format() for podcast in query]
-        print('-------Formatted Podcasts-------')
-        print(podcasts)
-    
+
         return jsonify({
             'success': True,
             'podcasts': podcasts
         })
 
+    @app.route('/podcasts/<int:podcast_id>', methods={'GET'})
+    def get_podcast_id(podcast_id):
+        query = Podcast.query.filter(Podcast.id == podcast_id).one_or_none()
+        podcast = query.format()
+
+        return jsonify({
+            'success': True,
+            'podcasts': podcast
+        })
+
     @app.route('/speakers', methods={'GET'})
     def get_speakers():
         query = Speaker.query.all()
-        print('-------Query Speakers-------')
-        print(query)
         speakers = [speaker.format() for speaker in query]
-        print('-------Formatted Speakers-------')
-        print(speakers)
     
         return jsonify({
             'success': True,
             'speakers': speakers
         })
+    
+    @app.route('/speakers/<int:speaker_id>', methods={'GET'})
+    def get_speaker_id(speaker_id):
+        query = Speaker.query.filter(Speaker.id == speaker_id).one_or_none()
+        speaker = query.format()
+
+        return jsonify({
+            'success': True,
+            'podcasts': speaker
+        })
 
     @app.route('/episodes', methods={'GET'})
     def get_episodes():
         query = Episode.query.all()
-        print('-------Query Episodes-------')
-        print(query)
         episodes = [episode.format() for episode in query]
-        print('-------Formatted Episodes-------')
-        print(episodes)
-    
+
         return jsonify({
             'success': True,
             'episodes': episodes
         })
+    
+    @app.route('/episodes/<int:episode_id>', methods={'GET'})
+    def get_episode_id(episode_id):
+        query = Episode.query.filter(Episode.id == episode_id).one_or_none()
+        episode = query.format()
+
+        return jsonify({
+            'success': True,
+            'podcasts': episode
+        })
+
+    '''
+    POST Endpoints
+    '''
+
+    @app.route('/podcasts', methods=['POST'])
+    def create_search_podcast():
+        body = request.get_json()
+        new_author = body.get('author', None)
+        new_name = body.get('name', None)
+        new_image_link = body.get('image', None)
+        new_podcast_link = body.get('podcast_link', None)
+        search = body.get('search', None)
+
+        try:
+            if search:
+                # Search in author and name in Podcasts
+                query_author = (
+                    Podcast.query
+                    .filter(Podcast.author.ilike("%{}%".format(search)))
+                )
+                
+                query_name = (
+                    Podcast.query
+                    .filter(Podcast.name.ilike("%{}%".format(search)))
+                )
+
+                search_count = len(query_name)+len(query_author)
+
+                result = {
+                    'success': True,
+                    'author_search': query_author,
+                    'name_search': query_name,
+                    'results': search_count
+                }
+            else:
+                # POST a new question
+                podcast = Podcast(
+                    author=new_author, name=new_name,
+                    image=new_image_link, podcast_link=new_podcast_link
+                )
+                podcast.insert()
+                result = {
+                    'success': True,
+                    'question': podcast.format()
+                }
+
+        except IndexError:
+            db.session.rollback()
+            print(sys.exc_info())
+            abort(422)
+
+        finally:
+            db.session.close()
+
+        return jsonify(result)
+
+    
 
     '''
     Error handlers for expected errors
