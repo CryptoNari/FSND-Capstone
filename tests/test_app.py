@@ -16,7 +16,12 @@ Class for Test Cases
 
 class CapstoneTestCase(unittest.TestCase):
     def insert_db_test_data(self):
-        podcast = Podcast(name="Test Podcast")
+        podcast = Podcast(
+            author= "Test Author",
+            name= "Test Podcast",
+            image= "image url",
+            podcast_link= "podcast Url"
+            )
         podcast.insert()
 
 
