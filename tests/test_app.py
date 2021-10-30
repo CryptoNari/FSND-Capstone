@@ -3,26 +3,27 @@ import os
 import unittest
 import json
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm.base import NOT_EXTENSION
 
 sys.path.insert(0, '..') # change path to import from parent dir
 
 from app import create_app
 from models import test_setup_db, Podcast, Speaker, Episode
-
+from tests.sample import reset_db_tables
 
 """
 Class for Test Cases
 """
 
 class CapstoneTestCase(unittest.TestCase):
-    def insert_db_test_data(self):
+    """ def insert_db_test_data(self):
         podcast = Podcast(
             author= "Test Author",
             name= "Test Podcast",
             image= "image url",
             podcast_link= "podcast Url"
             )
-        podcast.insert()
+        podcast.insert() """
 
 
     def setUp(self):
@@ -31,7 +32,9 @@ class CapstoneTestCase(unittest.TestCase):
         self.database_path = os.environ["TEST_DATABASE_URL"]
         self.db = SQLAlchemy()
         test_setup_db(self.app, self.database_path)
-        self.insert_db_test_data()
+        query = Podcast.query.all()
+        if not query:
+            reset_db_tables(self.app)
             
     
     def tearDown(self):
@@ -48,11 +51,6 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(data['message'], 'Healthy')
-
-    def test_db_table_podcast(self):
-        test = Podcast.query.first()
-      
-        self.assertEqual(test.name, 'Test Podcast')
 
     def test_get_podcasts(self):
         res = self.client().get('/podcasts')
