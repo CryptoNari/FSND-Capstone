@@ -89,7 +89,7 @@ def create_app(test_config=None):
             speaker = query.format()
             return jsonify({
                 'success': True,
-                'podcasts': speaker
+                'speakers': speaker
             })
         else:
             abort(404)
@@ -114,7 +114,7 @@ def create_app(test_config=None):
             episode = query.format()
             return jsonify({
                 'success': True,
-                'podcasts': episode
+                'episodes': episode
             })
         else:
             abort(404)
@@ -157,7 +157,7 @@ def create_app(test_config=None):
                     'results': search_count
                 }
             else:
-                # POST a new question
+                # POST a new podcast
                 podcast = Podcast(
                     author=new_author, name=new_name,
                     image=new_image_link, podcast_link=new_podcast_link
@@ -206,7 +206,7 @@ def create_app(test_config=None):
                     'results': search_count
                 }
             else:
-                # POST a new question
+                # POST a new speaker
                 speaker = Speaker(
                     name=new_name,
                     image=new_image_link,
@@ -265,7 +265,7 @@ def create_app(test_config=None):
                     'results': search_count
                 }
             else:
-                # POST a new question
+                # POST a new episode
                 episode = Episode(
                     title=new_title,
                     topics=new_topics,
@@ -300,6 +300,7 @@ def create_app(test_config=None):
             podcast.delete()
             result = {
               'success': True,
+              'deleted_id': podcast_id
             }
         except IndexError:
             db.session.rollback()
@@ -322,6 +323,7 @@ def create_app(test_config=None):
             speaker.delete()
             result = {
               'success': True,
+              'deleted_id': speaker_id
             }
         except IndexError:
             db.session.rollback()
@@ -342,7 +344,8 @@ def create_app(test_config=None):
             episode = Episode.query.get(episode_id)
             episode.delete()
             result = {
-              'success': True,
+                'success': True,
+                'deleted_id': episode_id 
             }
         except IndexError:
             db.session.rollback()
