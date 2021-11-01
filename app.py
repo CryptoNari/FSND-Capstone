@@ -4,7 +4,8 @@ from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from models import Podcast, Speaker, Episode, setup_db, db
-from tests.sample import reset_db_tables                    
+from tests.sample import reset_db_tables
+from .auth.auth import AuthError, requires_auth                 
 
 
 def create_app(test_config=None):
@@ -98,6 +99,7 @@ def create_app(test_config=None):
     '''
 
     @app.route('/podcasts', methods=['POST'])
+    @requires_auth('post:data')
     def create_search_podcast():
         body = request.get_json()
         new_author = body.get('author', None)
@@ -153,6 +155,7 @@ def create_app(test_config=None):
 
 
     @app.route('/speakers', methods=['POST'])
+    @requires_auth('post:data')
     def create_search_speaker():
         body = request.get_json()
         new_name = body.get('name', None)
@@ -204,6 +207,7 @@ def create_app(test_config=None):
 
     
     @app.route('/episodes', methods=['POST'])
+    @requires_auth('post:data')
     def create_search_episodes():
         body = request.get_json()
         new_title = body.get('title', None)
@@ -288,17 +292,20 @@ def create_app(test_config=None):
 
 
     @app.route('/podcasts/<int:podcast_id>', methods=['DELETE'])
+    @requires_auth('delete:data')
     def delete_podcast(podcast_id):
         
         return delete_by_id(Podcast, podcast_id) 
                
 
     @app.route('/speakers/<int:speaker_id>', methods=['DELETE'])
+    @requires_auth('delete:data')
     def delete_speaker(speaker_id):
         
         return delete_by_id(Speaker, speaker_id)
 
     @app.route('/episodes/<int:episode_id>', methods=['DELETE'])
+    @requires_auth('delete:data')
     def delete_episode(episode_id):
         
         return delete_by_id(Episode, episode_id)
@@ -307,6 +314,7 @@ def create_app(test_config=None):
     PATCH Endpoints
     '''
     @app.route('/podcasts/<int:podcast_id>', methods=['PATCH'])
+    @requires_auth('patch:data')
     def update_podcast(podcast_id):
         body = request.get_json()
         new_author = body.get('author', None)
@@ -341,6 +349,7 @@ def create_app(test_config=None):
 
 
     @app.route('/speakers/<int:speaker_id>', methods=['PATCH'])
+    @requires_auth('patch:data')
     def update_speaker(speaker_id):
         body = request.get_json()
         new_name = body.get('name', None)
@@ -374,6 +383,7 @@ def create_app(test_config=None):
         return jsonify(result)
     
     @app.route('/episodes/<int:episode_id>', methods=['PATCH'])
+    @requires_auth('patch:data')
     def update_episode(episode_id):
         body = request.get_json()
         new_title = body.get('title', None)
@@ -464,13 +474,13 @@ def create_app(test_config=None):
         }), 500
 
 
-    """ @app.errorhandler(AuthError)
+    @app.errorhandler(AuthError)
     def server_error(error):
         return jsonify({
             "success": False,
             "error": error.status_code,
             "message": error.description
-        }), error.status_code """
+        }), error.status_code
 
     return app
 
