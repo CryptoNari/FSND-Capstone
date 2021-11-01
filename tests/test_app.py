@@ -1,9 +1,12 @@
+from enum import _auto_null
+import random
 import sys
 import os
 import unittest
 import json
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm.base import NOT_EXTENSION
+from sqlalchemy.sql.expression import false
 from sqlalchemy.sql.sqltypes import Integer
 
 sys.path.insert(0, '..') # change path to import from parent dir
@@ -42,9 +45,9 @@ class CapstoneTestCase(unittest.TestCase):
 
         self.new_speaker = {
             'name': 'Test Name',
-            'image': 'image link',
-            'twitter': 'podcast link',
-            'website': 'weblink'    
+            'image_link': 'image link',
+            'twitter_link': 'podcast link',
+            'website_link': 'weblink'    
         }
 
         self.search_speaker = {
@@ -57,7 +60,7 @@ class CapstoneTestCase(unittest.TestCase):
         self.new_episode = {
             'title': 'Test Name',
             'topics': 'Tets topic',
-            'link': 'podcast link',
+            'podcast_link': 'podcast link',
             'speaker_id': speaker_query.id,
             'podcast_id': podcast_query.id 
         }
@@ -85,31 +88,23 @@ class CapstoneTestCase(unittest.TestCase):
 
 
     # GET Database table Endpoints
-    def test_get_podcasts(self):
-        res = self.client().get('/podcasts')
+    def table_data_tests(self, endpoint, response_data):
+        res = self.client().get(endpoint)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertNotEqual(len(data['podcasts']), 0)
+        self.assertNotEqual(len(data[response_data]), 0)
 
+
+    def test_get_podcasts(self):
+        self.table_data_tests('/podcasts', 'podcasts')
 
     def test_get_speakers(self):
-        res = self.client().get('/speakers')
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertNotEqual(len(data['speakers']), 0)
-
+        self.table_data_tests('/speakers', 'speakers')
 
     def test_get_episodes(self):
-        res = self.client().get('/episodes')
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertNotEqual(len(data['episodes']), 0)
+        self.table_data_tests('/episodes', 'episodes')
 
 
     # GET id Endpoints + not found
@@ -124,15 +119,6 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data['podcasts']['name'], query.name)
 
     
-    def test_get_podcast_id_not_found(self):
-        res = self.client().get('/podcasts/{}'.format(12345))
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], "resource not found")
-
-    
     def test_get_speaker_id(self):
         query = Speaker.query.first()
 
@@ -142,15 +128,6 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(data['speakers']['name'], query.name)
-
-
-    def test_get_speaker_id_not_found(self):
-        res = self.client().get('/speakers/{}'.format(12345))
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 404)
-        self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], "resource not found")
 
 
     def test_get_episode_id(self):
@@ -163,66 +140,138 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertEqual(data['episodes']['topics'], query.topics)
 
-
-    def test_get_episode_id_not_found(self):
-        res = self.client().get('/episodes/{}'.format(12345))
+    
+    def not_found_tests(self, endpoint, false_id):
+        res = self.client().get('{}/{}'.format(endpoint, false_id))
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], "resource not found")
 
+    def test_get_podcast_id_not_found(self):
+        self.not_found_tests('/podcasts', 12345)
+
+    def test_get_speaker_id_not_found(self):
+        self.not_found_tests('/speakers', 12345)
+
+    def test_get_episode_id_not_found(self):
+        self.not_found_tests('/episodes', 12345)
+
+
         
     # POST endpoints add data
 
+    def create_and_test (self, endpoint, response_values, test_data):
+        res = self.client().post(endpoint, json=test_data)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        for value in test_data:
+            self.assertEqual(
+                data[response_values][value],
+                test_data[value]
+            )
+
+
     def test_create_new_podcast(self):
-        res = self.client().post('/podcasts', json=self.new_podcast)
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(
-            data['podcast']['author'],
-            self.new_podcast['author']
-        )
-        self.assertEqual(
-            data['podcast']['name'],
-            self.new_podcast['name']
-        )
-        self.assertEqual(
-            data['podcast']['image'],
-            self.new_podcast['image']
-        )
-        self.assertEqual(
-            data['podcast']['podcast_link'],
-            self.new_podcast['podcast_link']
-        )
+        self.create_and_test('/podcasts', 'podcast', self.new_podcast)
     
+
     def test_create_new_speaker(self):
-        res = self.client().post('/speakers', json=self.new_speaker)
+        self.create_and_test('/speakers', 'speaker', self.new_speaker)
+       
+
+    def test_create_new_episode(self):
+        self.create_and_test('/episodes', 'episode', self.new_episode)
+
+
+    # POST endpoints search data
+
+    def search_and_test (self, endpoint, search_value):
+        res = self.client().post(endpoint, json=search_value)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertEqual(
-            data['speaker']['name'],
-            self.new_speaker['name']
-        )
-        self.assertEqual(
-            data['speaker']['image'],
-            self.new_speaker['image']
-        )
-        self.assertEqual(
-            data['speaker']['twitter'],
-            self.new_speaker['twitter']
-        )
-        self.assertEqual(
-            data['speaker']['website'],
-            self.new_speaker['website']
-        )
+    
+
+    def test_search_podcast(self):
+        self.search_and_test('/podcasts', self.search_podcast)
+    
+    def test_search_speaker(self):
+        self.search_and_test('/speakers', self.search_speaker)
+
+    def test_search_episode(self):
+        self.search_and_test('/episodes', self.search_episode)
+
+    # PATCH Endpoints
+    def update_id_tests(self,endpoint, update_id, update_data, reponse_data):
+        res = self.client().patch('{}/{}'.format(endpoint, update_id), json=update_data)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        for value in update_data:
+            self.assertEqual(
+                data[reponse_data][value],
+                update_data[value]
+            )
+        
+    def test_update_podcast(self):
+        search = Podcast.query.first()
+        update = {
+            'author': search.author,
+            'name': search.name,
+            'image': search.image_link,
+            'podcast_link': str(random.random()) 
+        }
+        self.update_id_tests('/podcasts', search.id, update, 'podcast')
+  
+        
+    def test_update_speaker(self):
+        search = Speaker.query.first()
+        update = {
+            'name': search.name,
+            'image_link': search.image_link,
+            'twitter_link': search.twitter_link,
+            'website_link': str(random.random())
+        }
+        self.update_id_tests('/speakers', search.id, update, 'speaker')
+
+    def test_update_episode(self):
+        search = Episode.query.first()
+        update = {
+            'title': search.title,
+            'topics': search.topics,
+            'podcast_link': str(random.random()),
+            'speaker_id': search.speaker_id,
+            'podcast_id': search.podcast_id 
+        }
+        self.update_id_tests('/episodes', search.id, update, 'episode')
 
 
+        
     # DELETE Endpoints
+
+    def delete_id_tests(self, delete_id, endpoint):
+        res = self.client().delete('{}/{}'.format(endpoint, delete_id))
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted_id'], delete_id)
+    
+
+    def test_delete_episode(self):
+        query = (
+            Episode.query
+            .filter(Episode.title == self.new_episode['title'])
+            .one_or_none()
+        )
+        self.delete_id_tests(query.id, '/episodes')
+
 
     def test_delete_podcast(self):
         query = (
@@ -230,27 +279,34 @@ class CapstoneTestCase(unittest.TestCase):
             .filter(Podcast.author == self.new_podcast['author'])
             .one_or_none()
         )
-        podcast_id = query.id
-        res = self.client().delete('/podcasts/{}'.format(podcast_id))
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['deleted_id'], podcast_id)
-
+        self.delete_id_tests(query.id, '/podcasts')
+    
     def test_delete_speaker(self):
         query = (
             Speaker.query
             .filter(Speaker.name == self.new_speaker['name'])
             .one_or_none()
         )
-        speaker_id = query.id
-        res = self.client().delete('/speakers/{}'.format(speaker_id))
+        self.delete_id_tests(query.id, '/speakers')
+
+    def delete_id_not_found_tests(self, endpoint, false_id):
+        res = self.client().delete('{}/{}'.format(endpoint, false_id))
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['deleted_id'], speaker_id)
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], "resource not found")
+
+     
+    def test_delete_podcast_not_found(self):
+        self.delete_id_not_found_tests('/podcasts', 12345)
+
+    def test_delete_speaker_not_found(self):
+        self.delete_id_not_found_tests('/speakers', 12345)
+    
+    def test_delete_episode_not_found(self):
+        self.delete_id_not_found_tests('/episodes', 12345)
+
 
 
 if __name__ == "__main__":

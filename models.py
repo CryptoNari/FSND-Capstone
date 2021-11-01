@@ -94,11 +94,11 @@ class Speaker(db.Model):
     website_link = Column(String(120))
     episodes = relationship('Episode', viewonly=True)
 
-    def __init__(self, name, image, twitter, website):
+    def __init__(self, name, image_link, twitter_link, website_link):
         self.name = name
-        self.image_link = image
-        self.twitter_link = twitter
-        self.website_link = website
+        self.image_link = image_link
+        self.twitter_link = twitter_link
+        self.website_link = website_link
 
     def insert(self):
         db.session.add(self)
@@ -115,9 +115,9 @@ class Speaker(db.Model):
         return {
             'id': self.id,
             'name': self.name,
-            'image': self.image_link,
-            'twitter': self.twitter_link,
-            'website': self.website_link,
+            'image_link': self.image_link,
+            'twitter_link': self.twitter_link,
+            'website_link': self.website_link,
             'episodes': len(self.episodes)
         }
 
@@ -140,10 +140,10 @@ class Episode(db.Model):
     # start_time = Column(DateTime())
     # finished = Column(Boolean, default=False, nullable=False)
 
-    def __init__(self, title, topics, link, podcast_id, speaker_id):
+    def __init__(self, title, topics, podcast_link, podcast_id, speaker_id):
         self.title = title
         self.topics = topics
-        self.podcast_link = link
+        self.podcast_link = podcast_link
         self.speaker_id = speaker_id
         self.podcast_id = podcast_id
 
@@ -164,9 +164,9 @@ class Episode(db.Model):
             'title': self.title,
             'topics': self.topics,
             'podcast_link': self.podcast_link,
-            'speaker-id': self.speaker_id,
+            'speaker_id': self.speaker_id,
             'speaker_name': self.speaker_name.name,
-            'podcast-id': self.podcast_id,
+            'podcast_id': self.podcast_id,
             'podcast_name': self.podcast_name.name,
             # 'published': self.start_time,
             # 'finished': self.finished

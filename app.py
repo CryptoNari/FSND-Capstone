@@ -168,7 +168,7 @@ def create_app(test_config=None):
                     'podcast': podcast.format()
                 }
 
-        except IndexError:
+        except:
             db.session.rollback()
             print(sys.exc_info())
             abort(422)
@@ -183,9 +183,9 @@ def create_app(test_config=None):
     def create_search_speaker():
         body = request.get_json()
         new_name = body.get('name', None)
-        new_image_link = body.get('image', None)
-        new_twitter_link = body.get('twitter', None)
-        new_website_link = body.get('website', None)
+        new_image_link = body.get('image_link', None)
+        new_twitter_link = body.get('twitter_link', None)
+        new_website_link = body.get('website_link', None)
         search = body.get('search', None)
 
         try:
@@ -209,9 +209,9 @@ def create_app(test_config=None):
                 # POST a new speaker
                 speaker = Speaker(
                     name=new_name,
-                    image=new_image_link,
-                    twitter=new_twitter_link,
-                    website=new_website_link
+                    image_link=new_image_link,
+                    twitter_link=new_twitter_link,
+                    website_link=new_website_link
                 )
                 speaker.insert()
                 result = {
@@ -219,7 +219,7 @@ def create_app(test_config=None):
                     'speaker': speaker.format()
                 }
 
-        except IndexError:
+        except:
             db.session.rollback()
             print(sys.exc_info())
             abort(422)
@@ -235,7 +235,7 @@ def create_app(test_config=None):
         body = request.get_json()
         new_title = body.get('title', None)
         new_topics = body.get('topics', None)
-        new_podcast_link = body.get('link', None)
+        new_podcast_link = body.get('podcast_link', None)
         new_speaker_id = body.get('speaker_id', None)
         new_podcast_id = body.get('podcast_id', None)
         search = body.get('search', None)
@@ -269,7 +269,7 @@ def create_app(test_config=None):
                 episode = Episode(
                     title=new_title,
                     topics=new_topics,
-                    link=new_podcast_link,
+                    podcast_link=new_podcast_link,
                     speaker_id=new_speaker_id,
                     podcast_id=new_podcast_id
                 )
@@ -279,7 +279,7 @@ def create_app(test_config=None):
                     'episode': episode.format()
                 }
 
-        except IndexError:
+        except:
             db.session.rollback()
             print(sys.exc_info())
             abort(422)
@@ -302,7 +302,7 @@ def create_app(test_config=None):
               'success': True,
               'deleted_id': podcast_id
             }
-        except IndexError:
+        except:
             db.session.rollback()
             print(sys.exc_info())
             if podcast is None:
@@ -325,7 +325,7 @@ def create_app(test_config=None):
               'success': True,
               'deleted_id': speaker_id
             }
-        except IndexError:
+        except:
             db.session.rollback()
             print(sys.exc_info())
             if speaker is None:
@@ -347,7 +347,7 @@ def create_app(test_config=None):
                 'success': True,
                 'deleted_id': episode_id 
             }
-        except IndexError:
+        except:
             db.session.rollback()
             print(sys.exc_info())
             if episode is None:
@@ -383,7 +383,7 @@ def create_app(test_config=None):
               'success': True,
               'podcast': podcast.format()
             }
-        except IndexError:
+        except:
             db.session.rollback()
             print(sys.exc_info())
             if podcast is None:
@@ -401,23 +401,23 @@ def create_app(test_config=None):
     def update_speaker(speaker_id):
         body = request.get_json()
         new_name = body.get('name', None)
-        new_image = body.get('image', None)
-        new_twitter = body.get('twitter', None)
-        new_website = body.get('website', None)
+        new_image = body.get('image_link', None)
+        new_twitter = body.get('twitter_link', None)
+        new_website = body.get('website_link', None)
         
 
         try:
             speaker = Speaker.query.get(speaker_id)
             speaker.name = new_name
-            speaker.image = new_image
-            speaker.twitter = new_twitter
-            speaker.website = new_website
+            speaker.image_link = new_image
+            speaker.twitter_link = new_twitter
+            speaker.website_link = new_website
             
             result = {
               'success': True,
               'speaker': speaker.format()
             }
-        except IndexError:
+        except:
             db.session.rollback()
             print(sys.exc_info())
             if speaker is None:
@@ -435,7 +435,7 @@ def create_app(test_config=None):
         body = request.get_json()
         new_title = body.get('title', None)
         new_topics = body.get('topics', None)
-        new_podcast_link = body.get('link', None)
+        new_podcast_link = body.get('podcast_link', None)
         new_speaker_id = body.get('speaker_id', None)
         new_podcast_id = body.get('podcast_id', None)
 
@@ -443,14 +443,14 @@ def create_app(test_config=None):
             episode = Episode.query.get(episode_id)
             episode.title = new_title
             episode.topics = new_topics
-            episode.link = new_podcast_link
+            episode.podcast_link = new_podcast_link
             episode.speaker_id = new_speaker_id
             episode.podcast_id = new_podcast_id
             result = {
               'success': True,
               'episode': episode.format()
             }
-        except IndexError:
+        except:
             db.session.rollback()
             print(sys.exc_info())
             if episode is None:
