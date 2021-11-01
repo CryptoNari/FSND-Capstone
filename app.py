@@ -35,10 +35,6 @@ def create_app(test_config=None):
         )
         return response
 
-    '''
-    GET Endpoints
-    '''
-
     @app.route('/', methods={'GET'})
     def home():
         return jsonify({
@@ -46,79 +42,56 @@ def create_app(test_config=None):
             'message': 'Healthy'
         })
 
+    '''
+    GET Endpoints
+    '''
+
+    def get_all(Model, value):
+        query = Model.query.all()
+        items = [items.format() for items in query]
+
+        return jsonify({
+            'success': True,
+            '{}'.format(value): items
+        })
+
+    def get_id(Model, id, value):
+        query = Model.query.filter(Model.id == id).one_or_none()
+        
+        if query:
+            item = query.format()
+            return jsonify({
+                'success': True,
+                '{}'.format(value): item
+            })
+        else:
+            abort(404)
+
+    
     @app.route('/podcasts', methods={'GET'})
     def get_podcasts():
-        query = Podcast.query.all()
-        podcasts = [podcast.format() for podcast in query]
-
-        return jsonify({
-            'success': True,
-            'podcasts': podcasts
-        })
-
+        return get_all(Podcast, 'podcasts')
+        
     @app.route('/podcasts/<int:podcast_id>', methods={'GET'})
     def get_podcast_id(podcast_id):
-        query = Podcast.query.filter(Podcast.id == podcast_id).one_or_none()
+        return get_id(Podcast, podcast_id, 'podcast')
         
-        if query:
-            podcast = query.format()
-            return jsonify({
-                'success': True,
-                'podcasts': podcast
-            })
-        else:
-            abort(404)
-
-
     @app.route('/speakers', methods={'GET'})
     def get_speakers():
-        query = Speaker.query.all()
-        speakers = [speaker.format() for speaker in query]
-    
-        return jsonify({
-            'success': True,
-            'speakers': speakers
-        })
-
-    
+        return get_all(Speaker, 'speakers')
+ 
     @app.route('/speakers/<int:speaker_id>', methods={'GET'})
     def get_speaker_id(speaker_id):
-        query = Speaker.query.filter(Speaker.id == speaker_id).one_or_none()
-        
-        if query:
-            speaker = query.format()
-            return jsonify({
-                'success': True,
-                'speakers': speaker
-            })
-        else:
-            abort(404)
+        return get_id(Speaker, speaker_id, 'speaker')
 
 
     @app.route('/episodes', methods={'GET'})
     def get_episodes():
-        query = Episode.query.all()
-        episodes = [episode.format() for episode in query]
-
-        return jsonify({
-            'success': True,
-            'episodes': episodes
-        })
-
+        return get_all(Episode, 'episodes')
     
     @app.route('/episodes/<int:episode_id>', methods={'GET'})
     def get_episode_id(episode_id):
-        query = Episode.query.filter(Episode.id == episode_id).one_or_none()
-        
-        if query:
-            episode = query.format()
-            return jsonify({
-                'success': True,
-                'episodes': episode
-            })
-        else:
-            abort(404)
-        
+        return get_id(Episode, episode_id, 'episode')
 
     '''
     POST Endpoints
@@ -292,73 +265,43 @@ def create_app(test_config=None):
     '''
     DELETE Endpoints
     '''
+    def delete_by_id(Model, id):
+        try:
+            query = Model.query.get(id)
+            query.delete()
+            result = {
+              'success': True,
+              'deleted_id': id
+            }
+        except:
+            db.session.rollback()
+            print(sys.exc_info())
+            if query is None:
+                abort(404)
+            else:
+                abort(422)
+
+        finally:
+            db.session.close()
+
+        return jsonify(result)
+
 
     @app.route('/podcasts/<int:podcast_id>', methods=['DELETE'])
     def delete_podcast(podcast_id):
-        try:
-            podcast = Podcast.query.get(podcast_id)
-            podcast.delete()
-            result = {
-              'success': True,
-              'deleted_id': podcast_id
-            }
-        except:
-            db.session.rollback()
-            print(sys.exc_info())
-            if podcast is None:
-                abort(404)
-            else:
-                abort(422)
-
-        finally:
-            db.session.close()
-
-        return jsonify(result)
         
+        return delete_by_id(Podcast, podcast_id) 
+               
 
     @app.route('/speakers/<int:speaker_id>', methods=['DELETE'])
     def delete_speaker(speaker_id):
-        try:
-            speaker = Speaker.query.get(speaker_id)
-            speaker.delete()
-            result = {
-              'success': True,
-              'deleted_id': speaker_id
-            }
-        except:
-            db.session.rollback()
-            print(sys.exc_info())
-            if speaker is None:
-                abort(404)
-            else:
-                abort(422)
-
-        finally:
-            db.session.close()
-
-        return jsonify(result)
+        
+        return delete_by_id(Speaker, speaker_id)
 
     @app.route('/episodes/<int:episode_id>', methods=['DELETE'])
     def delete_episode(episode_id):
-        try:
-            episode = Episode.query.get(episode_id)
-            episode.delete()
-            result = {
-                'success': True,
-                'deleted_id': episode_id 
-            }
-        except:
-            db.session.rollback()
-            print(sys.exc_info())
-            if episode is None:
-                abort(404)
-            else:
-                abort(422)
-
-        finally:
-            db.session.close()
-
-        return jsonify(result)
+        
+        return delete_by_id(Episode, episode_id)
 
     '''
     PATCH Endpoints

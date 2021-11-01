@@ -88,7 +88,7 @@ class CapstoneTestCase(unittest.TestCase):
 
 
     # GET Database table Endpoints
-    def table_data_tests(self, endpoint, response_data):
+    def table_get_all_tests(self, endpoint, response_data):
         res = self.client().get(endpoint)
         data = json.loads(res.data)
 
@@ -98,48 +98,38 @@ class CapstoneTestCase(unittest.TestCase):
 
 
     def test_get_podcasts(self):
-        self.table_data_tests('/podcasts', 'podcasts')
+        self.table_get_all_tests('/podcasts', 'podcasts')
 
     def test_get_speakers(self):
-        self.table_data_tests('/speakers', 'speakers')
+        self.table_get_all_tests('/speakers', 'speakers')
 
     def test_get_episodes(self):
-        self.table_data_tests('/episodes', 'episodes')
+        self.table_get_all_tests('/episodes', 'episodes')
 
 
     # GET id Endpoints + not found
+    def table_get_id_tests(self, Model, endpoint, response_name):
+        query = Model.query.first()
+
+        res = self.client().get('{}/{}'.format(endpoint, query.id))
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data[response_name]['id'], query.id)
+
+
+
     def test_get_podcast_id(self):
-        query = Podcast.query.first()
+        self.table_get_id_tests(Podcast, '/podcasts', 'podcast')
+        
 
-        res = self.client().get('/podcasts/{}'.format(query.id))
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['podcasts']['name'], query.name)
-
-    
     def test_get_speaker_id(self):
-        query = Speaker.query.first()
-
-        res = self.client().get('/speakers/{}'.format(query.id))
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['speakers']['name'], query.name)
+        self.table_get_id_tests(Speaker, '/speakers', 'speaker')
 
 
     def test_get_episode_id(self):
-        query = Episode.query.first()
-
-        res = self.client().get('/episodes/{}'.format(query.id))
-        data = json.loads(res.data)
-
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['episodes']['topics'], query.topics)
-
+        self.table_get_id_tests(Episode, '/episodes', 'episode')
     
     def not_found_tests(self, endpoint, false_id):
         res = self.client().get('{}/{}'.format(endpoint, false_id))
