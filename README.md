@@ -76,15 +76,39 @@ python app.py
 
 ### Models
 
-- Podcast
-- Speaker
-- Episode
+- Podcast - List of Podcasts
+- Speaker - List of Speakers/Podcast Guests  
+- Episode - Podcast Episode with speaker 
 
 ### Endpoints
 
-- Healthcheck GET '/'
-- GET '/podcasts', '/speakers' and '/episodes'
+-  Healthcheck GET '/'
+-  GET '/podcasts', '/speakers' and '/episodes'
+-  GET '/podcasts/<id>', '/speakers/<id>' and '/episodes/<id>'
+-  POST '/podcasts', '/speakers' and '/episodes'
+-  DELETE '/podcasts/<id>', '/speakers/<id>' and '/episodes/<id>'
+-  DELETE '/podcasts/<id>', '/speakers/<id>' and '/episodes/<id>'
 
+### Roles
+
+-   Admin
+    -   All permissions from 'Registered User'
+    -   Can update and delete db entries
+
+-   Registered User:
+    -   Can add and search db entries
+
+-   Everyone is able to proceed GET requests (no login necessary)
+
+#### Authentification tags
+
+-   Admin:
+    -   'post:data'
+    -   'patch:data'
+    -   'delete:data'
+
+-   Registered User:
+    -   'post:data'
 
 ## API Reference
 
