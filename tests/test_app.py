@@ -15,6 +15,19 @@ from app import create_app
 from models import test_setup_db, Podcast, Speaker, Episode
 from tests.sample import reset_db_tables
 
+def auth_header(role):
+    header = {}
+    if role == 'admin':
+        header ={
+                'Authorization': 'Bearer {}'.format(os.environ['ADMIN_TOKEN'])
+        }
+    elif role == 'user':
+        header ={
+                'Authorization': 'Bearer {}'.format(os.environ['USER_TOKEN'])
+        }
+    return header
+
+
 """
 Class for Test Cases
 """
@@ -152,8 +165,8 @@ class CapstoneTestCase(unittest.TestCase):
         
     # POST endpoints add data
 
-    def create_and_test (self, endpoint, response_values, test_data):
-        res = self.client().post(endpoint, json=test_data)
+    def create_and_test (self, endpoint, response_values, test_data, auth):
+        res = self.client().post(endpoint, json=test_data, headers=auth_header(auth))
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -166,21 +179,21 @@ class CapstoneTestCase(unittest.TestCase):
 
 
     def test_create_new_podcast(self):
-        self.create_and_test('/podcasts', 'podcast', self.new_podcast)
+        self.create_and_test('/podcasts', 'podcast', self.new_podcast, 'admin')
     
 
     def test_create_new_speaker(self):
-        self.create_and_test('/speakers', 'speaker', self.new_speaker)
+        self.create_and_test('/speakers', 'speaker', self.new_speaker, 'admin')
        
 
     def test_create_new_episode(self):
-        self.create_and_test('/episodes', 'episode', self.new_episode)
+        self.create_and_test('/episodes', 'episode', self.new_episode, 'admin')
 
 
     # POST endpoints search data
 
-    def search_and_test (self, endpoint, search_value):
-        res = self.client().post(endpoint, json=search_value)
+    def search_and_test (self, endpoint, search_value, auth):
+        res = self.client().post(endpoint, json=search_value, headers=auth_header(auth))
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -188,17 +201,17 @@ class CapstoneTestCase(unittest.TestCase):
     
 
     def test_search_podcast(self):
-        self.search_and_test('/podcasts', self.search_podcast)
+        self.search_and_test('/podcasts', self.search_podcast, 'admin')
     
     def test_search_speaker(self):
-        self.search_and_test('/speakers', self.search_speaker)
+        self.search_and_test('/speakers', self.search_speaker, 'admin')
 
     def test_search_episode(self):
-        self.search_and_test('/episodes', self.search_episode)
+        self.search_and_test('/episodes', self.search_episode, 'admin')
 
     # PATCH Endpoints
-    def update_id_tests(self,endpoint, update_id, update_data, reponse_data):
-        res = self.client().patch('{}/{}'.format(endpoint, update_id), json=update_data)
+    def update_id_tests(self,endpoint, update_id, update_data, reponse_data, auth):
+        res = self.client().patch('{}/{}'.format(endpoint, update_id), json=update_data, headers=auth_header(auth))
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -217,7 +230,7 @@ class CapstoneTestCase(unittest.TestCase):
             'image': search.image_link,
             'podcast_link': str(random.random()) 
         }
-        self.update_id_tests('/podcasts', search.id, update, 'podcast')
+        self.update_id_tests('/podcasts', search.id, update, 'podcast', 'admin')
   
         
     def test_update_speaker(self):
@@ -228,7 +241,7 @@ class CapstoneTestCase(unittest.TestCase):
             'twitter_link': search.twitter_link,
             'website_link': str(random.random())
         }
-        self.update_id_tests('/speakers', search.id, update, 'speaker')
+        self.update_id_tests('/speakers', search.id, update, 'speaker', 'admin')
 
     def test_update_episode(self):
         search = Episode.query.first()
@@ -239,15 +252,18 @@ class CapstoneTestCase(unittest.TestCase):
             'speaker_id': search.speaker_id,
             'podcast_id': search.podcast_id 
         }
-        self.update_id_tests('/episodes', search.id, update, 'episode')
+        self.update_id_tests('/episodes', search.id, update, 'episode', 'admin')
 
 
         
     # DELETE Endpoints
 
-    def delete_id_tests(self, delete_id, endpoint):
-        res = self.client().delete('{}/{}'.format(endpoint, delete_id))
+    def delete_id_tests(self, delete_id, endpoint, auth):
+        print(endpoint)
+        print(delete_id)
+        res = self.client().delete('{}/{}'.format(endpoint, delete_id), headers=auth_header(auth))
         data = json.loads(res.data)
+        print(data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
@@ -260,7 +276,7 @@ class CapstoneTestCase(unittest.TestCase):
             .filter(Episode.title == self.new_episode['title'])
             .one_or_none()
         )
-        self.delete_id_tests(query.id, '/episodes')
+        self.delete_id_tests(query.id, '/episodes', 'admin')
 
 
     def test_delete_podcast(self):
@@ -269,7 +285,7 @@ class CapstoneTestCase(unittest.TestCase):
             .filter(Podcast.author == self.new_podcast['author'])
             .one_or_none()
         )
-        self.delete_id_tests(query.id, '/podcasts')
+        self.delete_id_tests(query.id, '/podcasts', 'admin')
     
     def test_delete_speaker(self):
         query = (
@@ -277,10 +293,10 @@ class CapstoneTestCase(unittest.TestCase):
             .filter(Speaker.name == self.new_speaker['name'])
             .one_or_none()
         )
-        self.delete_id_tests(query.id, '/speakers')
+        self.delete_id_tests(query.id, '/speakers', 'admin')
 
-    def delete_id_not_found_tests(self, endpoint, false_id):
-        res = self.client().delete('{}/{}'.format(endpoint, false_id))
+    def delete_id_not_found_tests(self, endpoint, false_id, auth):
+        res = self.client().delete('{}/{}'.format(endpoint, false_id), headers=auth_header(auth))
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)
@@ -289,13 +305,13 @@ class CapstoneTestCase(unittest.TestCase):
 
      
     def test_delete_podcast_not_found(self):
-        self.delete_id_not_found_tests('/podcasts', 12345)
+        self.delete_id_not_found_tests('/podcasts', 12345, 'admin')
 
     def test_delete_speaker_not_found(self):
-        self.delete_id_not_found_tests('/speakers', 12345)
+        self.delete_id_not_found_tests('/speakers', 12345, 'admin')
     
     def test_delete_episode_not_found(self):
-        self.delete_id_not_found_tests('/episodes', 12345)
+        self.delete_id_not_found_tests('/episodes', 12345, 'admin')
 
 
 

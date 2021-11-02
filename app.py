@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from models import Podcast, Speaker, Episode, setup_db, db
 from tests.sample import reset_db_tables
-from .auth.auth import AuthError, requires_auth                 
+from auth.auth import AuthError, requires_auth                 
 
 
 def create_app(test_config=None):
@@ -100,7 +100,7 @@ def create_app(test_config=None):
 
     @app.route('/podcasts', methods=['POST'])
     @requires_auth('post:data')
-    def create_search_podcast():
+    def create_search_podcast(payload):
         body = request.get_json()
         new_author = body.get('author', None)
         new_name = body.get('name', None)
@@ -156,7 +156,7 @@ def create_app(test_config=None):
 
     @app.route('/speakers', methods=['POST'])
     @requires_auth('post:data')
-    def create_search_speaker():
+    def create_search_speaker(payload):
         body = request.get_json()
         new_name = body.get('name', None)
         new_image_link = body.get('image_link', None)
@@ -208,7 +208,7 @@ def create_app(test_config=None):
     
     @app.route('/episodes', methods=['POST'])
     @requires_auth('post:data')
-    def create_search_episodes():
+    def create_search_episodes(payload):
         body = request.get_json()
         new_title = body.get('title', None)
         new_topics = body.get('topics', None)
@@ -293,20 +293,20 @@ def create_app(test_config=None):
 
     @app.route('/podcasts/<int:podcast_id>', methods=['DELETE'])
     @requires_auth('delete:data')
-    def delete_podcast(podcast_id):
+    def delete_podcast(payload, podcast_id):
         
         return delete_by_id(Podcast, podcast_id) 
                
 
     @app.route('/speakers/<int:speaker_id>', methods=['DELETE'])
     @requires_auth('delete:data')
-    def delete_speaker(speaker_id):
+    def delete_speaker(payload, speaker_id):
         
         return delete_by_id(Speaker, speaker_id)
 
     @app.route('/episodes/<int:episode_id>', methods=['DELETE'])
     @requires_auth('delete:data')
-    def delete_episode(episode_id):
+    def delete_episode(payload, episode_id):
         
         return delete_by_id(Episode, episode_id)
 
@@ -315,7 +315,7 @@ def create_app(test_config=None):
     '''
     @app.route('/podcasts/<int:podcast_id>', methods=['PATCH'])
     @requires_auth('patch:data')
-    def update_podcast(podcast_id):
+    def update_podcast(payload, podcast_id):
         body = request.get_json()
         new_author = body.get('author', None)
         new_name = body.get('name', None)
@@ -350,7 +350,7 @@ def create_app(test_config=None):
 
     @app.route('/speakers/<int:speaker_id>', methods=['PATCH'])
     @requires_auth('patch:data')
-    def update_speaker(speaker_id):
+    def update_speaker(payload, speaker_id):
         body = request.get_json()
         new_name = body.get('name', None)
         new_image = body.get('image_link', None)
@@ -384,7 +384,7 @@ def create_app(test_config=None):
     
     @app.route('/episodes/<int:episode_id>', methods=['PATCH'])
     @requires_auth('patch:data')
-    def update_episode(episode_id):
+    def update_episode(payload, episode_id):
         body = request.get_json()
         new_title = body.get('title', None)
         new_topics = body.get('topics', None)
