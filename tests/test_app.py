@@ -24,6 +24,13 @@ def auth_header(role):
         header = {
                 'Authorization': 'Bearer {}'.format(os.environ['USER_TOKEN'])
         }
+    elif role == 'unvalid_Token':
+        header = {
+                'Authorization': 'Foobar {}'.format(os.environ['USER_TOKEN'])
+        }
+    elif role == 'no token':
+        header = {}
+
     return header
 
 
@@ -190,12 +197,15 @@ class CapstoneTestCase(unittest.TestCase):
 
     def test_search_podcast(self):
         self.search_and_test('/podcasts', self.search_podcast, 'admin')
+        self.search_and_test('/podcasts', self.search_podcast, 'user')
 
     def test_search_speaker(self):
         self.search_and_test('/speakers', self.search_speaker, 'admin')
+        self.search_and_test('/speakers', self.search_speaker, 'user')
 
     def test_search_episode(self):
         self.search_and_test('/episodes', self.search_episode, 'admin')
+        self.search_and_test('/episodes', self.search_episode, 'user')
 
     # PATCH Endpoints
     def update_id_tests(self, endpoint, update_id,
@@ -319,6 +329,26 @@ class CapstoneTestCase(unittest.TestCase):
 
     def test_delete_episode_not_found(self):
         self.delete_id_not_found_tests('/episodes', 12345, 'admin')
+
+    # RBAC tests
+    def test_corrupt_token(self):
+        res = self.client().delete(
+                                '/podcasts/5000',
+                                headers=auth_header('unvalid_Token')
+                            )
+        data = json.loads(res.data)
+        print(data)
+        self.assertEqual(res.status_code, 401)
+
+    def test_permission_not_authorized(self):
+        res = self.client().delete(
+                                '/podcasts/5000',
+                                headers=auth_header('user')
+                            )
+        data = json.loads(res.data)
+        print(data)
+        self.assertEqual(res.status_code, 403)
+
 
 
 if __name__ == "__main__":
