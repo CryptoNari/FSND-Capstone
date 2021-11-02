@@ -1,3 +1,8 @@
+""" 
+Code adopted and adapted from previous own FSND Project - Coffee shop
+https://github.com/CryptoNari/CoffeeShop 
+""" 
+
 import json
 import os
 from flask import request
@@ -145,7 +150,7 @@ def verify_decode_jwt(token):
 '''
     Decorator @requires_auth(permission)
     INPUTS:
-        permission: string permission (i.e. 'post:drink')
+        permission: string permission (i.e. 'post:data')
     RETURNS:
     Decorator which passes the decoded payload to the decorated method
 '''

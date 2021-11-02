@@ -259,11 +259,8 @@ class CapstoneTestCase(unittest.TestCase):
     # DELETE Endpoints
 
     def delete_id_tests(self, delete_id, endpoint, auth):
-        print(endpoint)
-        print(delete_id)
         res = self.client().delete('{}/{}'.format(endpoint, delete_id), headers=auth_header(auth))
         data = json.loads(res.data)
-        print(data)
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
