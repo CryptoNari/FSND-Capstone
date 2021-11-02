@@ -1,7 +1,7 @@
-""" 
+"""
 Code adopted and adapted from previous own FSND Project - Coffee shop
-https://github.com/CryptoNari/CoffeeShop 
-""" 
+https://github.com/CryptoNari/CoffeeShop
+"""
 
 import json
 import os
@@ -11,12 +11,12 @@ from jose import jwt
 from urllib.request import urlopen
 
 
-#AUTH0_DOMAIN = 'fseduc.eu.auth0.com'
+# AUTH0_DOMAIN = 'fseduc.eu.auth0.com'
 AUTH0_DOMAIN = os.environ['AUTH0_DOMAIN']
-#ALGORITHMS = ['RS256']
+# ALGORITHMS = ['RS256']
 ALGORITHMS = os.environ['ALGORITHMS']
-#API_AUDIENCE = 'Capstone'
-API_AUDIENCE =  os.environ['API_AUDIENCE']
+# API_AUDIENCE = 'Capstone'
+API_AUDIENCE = os.environ['API_AUDIENCE']
 
 
 '''
@@ -179,5 +179,3 @@ class AuthError(Exception):
     def __init__(self, error, status_code):
         self.description = error
         self.status_code = status_code
-
-

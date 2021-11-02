@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from models import Podcast, Speaker, Episode, setup_db, db
 from tests.sample import reset_db_tables
-from auth.auth import AuthError, requires_auth                 
+from auth.auth import AuthError, requires_auth
 
 
 def create_app(test_config=None):
@@ -15,7 +15,7 @@ def create_app(test_config=None):
     app.config['JSON_SORT_KEYS'] = False
 
     # reset_db_tables(app) # delete tables and fill with sample data
-    
+
     '''
     Set up CORS
     '''
@@ -58,7 +58,7 @@ def create_app(test_config=None):
 
     def get_id(Model, id, value):
         query = Model.query.filter(Model.id == id).one_or_none()
-        
+
         if query:
             item = query.format()
             return jsonify({
@@ -68,28 +68,26 @@ def create_app(test_config=None):
         else:
             abort(404)
 
-    
     @app.route('/podcasts', methods={'GET'})
     def get_podcasts():
         return get_all(Podcast, 'podcasts')
-        
+
     @app.route('/podcasts/<int:podcast_id>', methods={'GET'})
     def get_podcast_id(podcast_id):
         return get_id(Podcast, podcast_id, 'podcast')
-        
+
     @app.route('/speakers', methods={'GET'})
     def get_speakers():
         return get_all(Speaker, 'speakers')
- 
+
     @app.route('/speakers/<int:speaker_id>', methods={'GET'})
     def get_speaker_id(speaker_id):
         return get_id(Speaker, speaker_id, 'speaker')
 
-
     @app.route('/episodes', methods={'GET'})
     def get_episodes():
         return get_all(Episode, 'episodes')
-    
+
     @app.route('/episodes/<int:episode_id>', methods={'GET'})
     def get_episode_id(episode_id):
         return get_id(Episode, episode_id, 'episode')
@@ -153,7 +151,6 @@ def create_app(test_config=None):
 
         return jsonify(result)
 
-
     @app.route('/speakers', methods=['POST'])
     @requires_auth('post:data')
     def create_search_speaker(payload):
@@ -167,7 +164,7 @@ def create_app(test_config=None):
         try:
             if search:
                 # Search in Speakers for names
-                
+
                 query_name = (
                     Speaker.query
                     .filter(Speaker.name.ilike("%{}%".format(search)))
@@ -205,7 +202,6 @@ def create_app(test_config=None):
 
         return jsonify(result)
 
-    
     @app.route('/episodes', methods=['POST'])
     @requires_auth('post:data')
     def create_search_episodes(payload):
@@ -220,7 +216,7 @@ def create_app(test_config=None):
         try:
             if search:
                 # Search in Episodes for titles and topics
-                
+
                 query_title = (
                     Episode.query
                     .filter(Episode.title.ilike("%{}%".format(search)))
@@ -290,24 +286,22 @@ def create_app(test_config=None):
 
         return jsonify(result)
 
-
     @app.route('/podcasts/<int:podcast_id>', methods=['DELETE'])
     @requires_auth('delete:data')
     def delete_podcast(payload, podcast_id):
-        
-        return delete_by_id(Podcast, podcast_id) 
-               
+
+        return delete_by_id(Podcast, podcast_id)
 
     @app.route('/speakers/<int:speaker_id>', methods=['DELETE'])
     @requires_auth('delete:data')
     def delete_speaker(payload, speaker_id):
-        
+
         return delete_by_id(Speaker, speaker_id)
 
     @app.route('/episodes/<int:episode_id>', methods=['DELETE'])
     @requires_auth('delete:data')
     def delete_episode(payload, episode_id):
-        
+
         return delete_by_id(Episode, episode_id)
 
     '''
@@ -321,7 +315,6 @@ def create_app(test_config=None):
         new_name = body.get('name', None)
         new_image = body.get('image', None)
         new_podcast_link = body.get('podcast_link', None)
-        
 
         try:
             podcast = Podcast.query.get(podcast_id)
@@ -329,7 +322,7 @@ def create_app(test_config=None):
             podcast.name = new_name
             podcast.image = new_image
             podcast.podcast_link = new_podcast_link
-            
+
             result = {
               'success': True,
               'podcast': podcast.format()
@@ -347,7 +340,6 @@ def create_app(test_config=None):
 
         return jsonify(result)
 
-
     @app.route('/speakers/<int:speaker_id>', methods=['PATCH'])
     @requires_auth('patch:data')
     def update_speaker(payload, speaker_id):
@@ -356,7 +348,6 @@ def create_app(test_config=None):
         new_image = body.get('image_link', None)
         new_twitter = body.get('twitter_link', None)
         new_website = body.get('website_link', None)
-        
 
         try:
             speaker = Speaker.query.get(speaker_id)
@@ -364,7 +355,7 @@ def create_app(test_config=None):
             speaker.image_link = new_image
             speaker.twitter_link = new_twitter
             speaker.website_link = new_website
-            
+
             result = {
               'success': True,
               'speaker': speaker.format()
@@ -381,7 +372,7 @@ def create_app(test_config=None):
             db.session.close()
 
         return jsonify(result)
-    
+
     @app.route('/episodes/<int:episode_id>', methods=['PATCH'])
     @requires_auth('patch:data')
     def update_episode(payload, episode_id):
@@ -416,7 +407,6 @@ def create_app(test_config=None):
 
         return jsonify(result)
 
-
     '''
     Error handlers for expected errors
     '''
@@ -428,7 +418,6 @@ def create_app(test_config=None):
             "message": "bad request"
         }), 400
 
-
     @app.errorhandler(401)
     def unauthorized(error):
         return jsonify({
@@ -436,7 +425,6 @@ def create_app(test_config=None):
             "error": 401,
             "message": "unauthorized"
         }), 401
-
 
     @app.errorhandler(403)
     def forbidden(error):
@@ -446,7 +434,6 @@ def create_app(test_config=None):
             "message": "forbidden"
         }), 403
 
-
     @app.errorhandler(404)
     def not_found(error):
         return jsonify({
@@ -454,7 +441,6 @@ def create_app(test_config=None):
             "error": 404,
             "message": "resource not found"
         }), 404
-
 
     @app.errorhandler(422)
     def unprocessable(error):
@@ -464,7 +450,6 @@ def create_app(test_config=None):
             "message": "unprocessable"
         }), 422
 
-
     @app.errorhandler(500)
     def server_error(error):
         return jsonify({
@@ -472,7 +457,6 @@ def create_app(test_config=None):
             "error": 500,
             "message": "internal server error"
         }), 500
-
 
     @app.errorhandler(AuthError)
     def server_error(error):
@@ -484,8 +468,9 @@ def create_app(test_config=None):
 
     return app
 
+
 app = create_app()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
-    #app.run()
+    # app.run()
