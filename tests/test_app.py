@@ -350,6 +350,5 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 403)
 
 
-
 if __name__ == "__main__":
     unittest.main()

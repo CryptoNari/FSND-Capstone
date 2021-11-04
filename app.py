@@ -18,8 +18,6 @@ def create_app(test_config=None):
     if not query:
         reset_db_tables(app)
 
-    
-
     '''
     Set up CORS
     '''
