@@ -242,3 +242,480 @@ For local testin you have to replace it with the Local hosted Url.
 }
 ```
 
+#### GET ('/podcasts/int:podcast_id')
+- General:
+    - Fetches podcast of given podcast_id
+- Sample:
+    - `curl https://fsnd-capstone2021.herokuapp.com/podcasts/19`
+
+- Returns:
+```
+{
+    "success":true,
+    "podcast":{
+        "id":19,
+        "author":"Robert Breedlove",
+        "name":"The 'What is money?' Show",
+        "image":"https://production.listennotes.com/podcasts/the-what-is-money-show-robert-breedlove-LZHEONsqo51-4XBAzvpCmj0.1400x1400.jpg",
+        "podcast_link":"https://open.spotify.com/show/25LPvm8EewBGyfQQ1abIsE",
+        "speakers":2,
+        "episodes":4
+    }
+}
+```
+
+#### GET ('/speakers/int:speaker_id')
+- General:
+    - Fetches speaker of given speaker_id
+- Sample:
+    - `curl https://fsnd-capstone2021.herokuapp.com/speakers/7`
+
+- Returns:
+```
+{
+    "success":true,
+    "speaker":{
+        "id":7,
+        "name":"Michael Saylor",
+        "image_link":"https://unchainedpodcast.com/wp-content/uploads/2021/01/Michael_Saylor.jpg",
+        "twitter_link":"https://twitter.com/saylor",
+        "website_link":"https://www.hope.com",
+        "episodes":2
+    }
+}
+```
+
+#### GET ('/episodes/int:episode_id')
+- General:
+    - Fetches episode of given id
+- Sample:
+    - `curl https://fsnd-capstone2021.herokuapp.com/episodes/9`
+
+- Returns:
+```
+{
+    "success":true,
+    "episode":{
+        "id":9,
+        "title":"The Saylor Series | Episode 1",
+        "topics":"Bitcoin","podcast_link":"https://open.spotify.com/episode/5vTqGVN513uTGX1yXcKzJu",
+        "speaker_id":7,
+        "speaker_name":"Michael Saylor",
+        "podcast_id":19,
+        "podcast_name":"The 'What is money?' Show"
+    }
+}
+```
+
+#### POST ('/podcasts')
+
+- General:
+    - Post new podcast or search podcast depending on request data
+    
+ ##### New Podcast
+
+    Request data {
+        'author'='Author name',  # String
+        'name'='Podcast Name',  # String
+        'image'='Image Link',   # String
+        'podcast_link'='podcast_link'    # String
+    }
+
+- Authentification
+    - needs Bearer Token with Authorization header 'post:data'
+- Sample:
+    ```
+    curl --request POST https://fsnd-capstone2021.herokuapp.com/podcasts \
+    -d '{"author":"Test","name":"Test","image":"Test","podcast_link":"Test"}' \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $ADMIN_TOKEN"
+    ```
+
+- Returns:
+```
+{
+    "success":true,
+    "podcast":{
+        "id":27,
+        "author":"Test",
+        "name":"Test",
+        "image":"Test",
+        "podcast_link":"Test",
+        "speakers":0,
+        "episodes":0
+    }
+}
+```
+##### search Podcast
+    - search in Podcasts for author and name
+
+    Request data {
+        'search'='Robert',  # String
+    }
+
+- Authentification
+    - needs Bearer Token with Authorization header 'post:data'
+- Sample:
+    ```
+    curl --request POST https://fsnd-capstone2021.herokuapp.com/podcasts \
+    -d '{"search":"Robert"}' \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $ADMIN_TOKEN"
+    ```
+
+- Returns:
+```
+{
+    "success":true,
+    "author_search":[
+        {
+            "id":19,
+            "author":"Robert Breedlove",
+            "name":"The 'What is money?' Show",
+            "image":"https://production.listennotes.com/podcasts/the-what-is-money-show-robert-breedlove-LZHEONsqo51-4XBAzvpCmj0.1400x1400.jpg",
+            "podcast_link":"https://open.spotify.com/show/25LPvm8EewBGyfQQ1abIsE",
+            "speakers":2,
+            "episodes":2
+        }
+    ],
+    "name_search":[],
+    "results":1
+}
+```
+
+#### POST ('/speakers')
+
+- General:
+    - Post new speaker or search speaker depending on request data
+    
+ ##### New Speaker
+
+    Request data {
+        'name'='Speaker name',  # String
+        'image_link'='Image link',  # String
+        'twitter_link'='Twitter Link',   # String
+        'website_link'='Podcast link'    # String
+    }
+
+- Authentification
+    - needs Bearer Token with Authorization header 'post:data'
+- Sample:
+    ```
+    curl --request POST https://fsnd-capstone2021.herokuapp.com/speakers \
+    -d '{"name":"Test","image_link":"Test","twitter_link":"Test","website_link":"Test"}' \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $ADMIN_TOKEN"
+    ```
+
+- Returns:
+```
+{
+    "success":true,
+    "speaker":{
+        "id":13,
+        "name":"Test",
+        "image_link":"Test",
+        "twitter_link":"Test",
+        "website_link":"Test",
+        "episodes":0
+    }
+}
+```
+##### search Speaker
+    - search in Speakers for Speaker name
+
+    Request data {
+        'search'='Michael',  # String
+    }
+
+- Authentification
+    - needs Bearer Token with Authorization header 'post:data'
+- Sample:
+    ```
+    curl --request POST https://fsnd-capstone2021.herokuapp.com/speakers \
+    -d '{"search":"Michael"}' \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $ADMIN_TOKEN"
+    ```
+
+- Returns:
+```
+{
+    "success":true,
+    "name_search":[
+        {
+            "id":7,"name":"Michael Saylor",
+            "image_link":"https://unchainedpodcast.com/wp-content/uploads/2021/01/Michael_Saylor.jpg",
+            "twitter_link":"https://twitter.com/saylor",
+            "website_link":"https://www.hope.com",
+            "episodes":1
+        }
+    ],
+    "results":1
+}
+```
+
+#### POST ('/episodes')
+
+- General:
+    - Post new episode or search speaker depending on request data
+    
+ ##### New Episode
+
+    Request data {
+        'title'='Title',  # String
+        'topics'='Topics',  # String
+        'podcast_link'='Podcast link'    # String
+        'podcast_id'= 23,  # Integer, ForeignKey Podcast.id
+        'speaker_id'= 9   # Integer, ForeignKey Speaker.id
+    }
+
+- Authentification
+    - needs Bearer Token with Authorization header 'post:data'
+- Sample:
+    ```
+    curl --request POST https://fsnd-capstone2021.herokuapp.com/episodes \
+    -d '{"title":"Test","topics":"Test","podcast_link":"Test","podcast_id":23,"speaker_id":9}' \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $ADMIN_TOKEN"
+    ```
+
+- Returns:
+```
+{
+    "success":true,
+    "episode":{
+        "id":17,
+        "title":"Test",
+        "topics":"Test",
+        "podcast_link":"Test",
+        "speaker_id":9,
+        "speaker_name":"Raoul Pal",
+        "podcast_id":23,
+        "podcast_name":"The Defiant"
+    }
+}
+```
+##### search Episodes
+    - search in Episodes for Episode title and topics
+
+    Request data {
+        'search'='Ethereum',  # String
+    }
+
+- Authentification
+    - needs Bearer Token with Authorization header 'post:data'
+- Sample:
+    ```
+    curl --request POST https://fsnd-capstone2021.herokuapp.com/episodes \
+    -d '{"search":"Ethereum"}' \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $ADMIN_TOKEN"
+    ```
+
+- Returns:
+```
+{
+    "success":true,
+    "title_search":[
+        {
+            "id":11,
+            "title":"The biggest, clearest bet of all is Ethereum",
+            "topics":"Ethereum",
+            "podcast_link":"https://open.spotify.com/episode/77Q1Ngg76PuexnZDRzSniO",
+            "speaker_id":9,
+            "speaker_name":"Raoul Pal",
+            "podcast_id":23,"podcast_name":"The Defiant"
+        }
+    ],
+    "topics_search":[
+        {
+            "id":11,
+            "title":"The biggest, clearest bet of all is Ethereum",
+            "topics":"Ethereum",
+            "podcast_link":"https://open.spotify.com/episode/77Q1Ngg76PuexnZDRzSniO",
+            "speaker_id":9,
+            "speaker_name":"Raoul Pal",
+            "podcast_id":23,
+            "podcast_name":"The Defiant"
+        }
+    ],
+    "results":2
+}
+```
+
+#### PATCH ('/podcasts/int:podcast_id')
+
+- General:
+    - Update podcast of given podcast id
+
+    Request data {
+        'author'='Author name',  # String
+        'name'='Podcast Name',  # String
+        'image'='Image Link',   # String
+        'podcast_link'='podcast_link'    # String
+    }
+
+- Authentification
+    - needs Bearer Token with Authorization header 'patch:data'
+- Sample:
+    ```
+    curl --request PATCH https://fsnd-capstone2021.herokuapp.com/podcasts/19 \
+    -d '{"author":"Robert Breedlove","name":"The What is money? Show ","image":"Test_Update","podcast_link":"https://open.spotify.com/show/25LPvm8EewBGyfQQ1abIsE"}' \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $ADMIN_TOKEN"
+    ```
+
+- Returns:
+```
+{
+    "success":true,
+    "podcast":{
+        "id":19,
+        "author":"Robert Breedlove",
+        "name":"The What is money? Show ",
+        "image":"https://production.listennotes.com/podcasts/the-what-is-money-show-robert-breedlove-LZHEONsqo51-4XBAzvpCmj0.1400x1400.jpg",
+        "podcast_link":"https://open.spotify.com/show/25LPvm8EewBGyfQQ1abIsE",
+        "speakers":2,
+        "episodes":2
+    }
+}
+```
+
+#### PATCH ('/speakers/int:speaker_id')
+
+- General:
+    - Update Speaker of given Speaker id
+
+    Request data {
+        'name'='Speaker name',  # String
+        'image_link'='Image link',  # String
+        'twitter_link'='Twitter Link',   # String
+        'website_link'='Podcast link'    # String
+    }
+
+- Authentification
+    - needs Bearer Token with Authorization header 'patch:data'
+- Sample:
+    ```
+    curl --request PATCH https://fsnd-capstone2021.herokuapp.com/speakers/9 \
+    -d '{"name":"Raoul Pal","image_link":"Test_Update","twitter_link":"https://twitter.com/RaoulGMI","website_link":"https://www.realvision.com/"}' \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $ADMIN_TOKEN"
+    ```
+
+- Returns:
+```
+{
+    "success":true,
+    "speaker":{
+        "id":9,
+        "name":"Raoul Pal",
+        "image_link":"Test_Update",
+        "twitter_link":"https://twitter.com/RaoulGMI",
+        "website_link":"https://www.realvision.com/",
+        "episodes":2
+    }
+}
+```
+#### PATCH ('/episodes/int:episode_id')
+
+- General:
+    - Update Episode of given Episode id
+
+    Request data {
+        'title'='Speaker name',  # String
+        'topics'='Speaker name',  # String
+        'podcast_link'='Podcast link'    # String
+        'podcast_id'= 23,  # Integer, ForeignKey Podcast.id
+        'speaker_id'= 9   # Integer, ForeignKey Speaker.id
+    }
+
+- Authentification
+    - needs Bearer Token with Authorization header 'patch:data'
+- Sample:
+    ```
+    curl --request PATCH https://fsnd-capstone2021.herokuapp.com/episodes/13 \
+    -d '{"title":"What traditional Investors think of Bitcoin","topics":"Bitcoin","podcast_link":"Test_Update","podcast_id":21,"speaker_id":9}' \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $ADMIN_TOKEN"
+    ```
+
+- Returns:
+```
+{
+    "success":true,
+    "episode":{
+        "id":13,
+        "title":"What traditional Investors think of Bitcoin",
+        "topics":"Bitcoin",
+        "podcast_link":"Test_Update",
+        "speaker_id":9,
+        "speaker_name":"Raoul Pal",
+        "podcast_id":21,
+        "podcast_name":"The What Bitcoin Did Podcast"
+    }
+}
+```
+
+#### DELETE ('/podcasts/int:podcast_id')
+
+- General:
+    - DELETE podcast of given podcast id
+
+- Authentification
+    - needs Bearer Token with Authorization header 'delete:data'
+- Sample:
+    ```
+    curl --request DELETE https://fsnd-capstone2021.herokuapp.com/podcasts/28 \
+    -H "Authorization: Bearer $ADMIN_TOKEN"
+    ```
+
+- Returns:
+```
+{
+    "success":true,
+    "deleted_id":28
+}
+```
+
+#### DELETE ('/speakers/int:speaker_id')
+
+- General:
+    - Delete Speaker of given Speaker id
+
+- Authentification
+    - needs Bearer Token with Authorization header 'delete:data'
+- Sample:
+    ```
+    curl --request DELETE https://fsnd-capstone2021.herokuapp.com/speakers/15 \
+    -H "Authorization: Bearer $ADMIN_TOKEN"
+    ```
+
+- Returns:
+```
+{
+    "success":true,
+    "deleted_id":15
+}
+```
+#### DELETE ('/episodes/int:episode_id')
+
+- General:
+    - Delete Episode of given Episode id
+
+- Authentification
+    - needs Bearer Token with Authorization header 'delete:data'
+- Sample:
+    ```
+    curl --request DELETE https://fsnd-capstone2021.herokuapp.com/episodes/18 \
+    -H "Authorization: Bearer $ADMIN_TOKEN"
+    ```
+
+- Returns:
+```
+{
+    "success":true,
+    "deleted_id":18
+}
+```
