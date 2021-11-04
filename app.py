@@ -13,8 +13,12 @@ def create_app(test_config=None):
     app = Flask(__name__)
     setup_db(app)
     app.config['JSON_SORT_KEYS'] = False
+    # if no data in table fill with sample data
+    query = Podcast.query.all
+    if not query:
+        reset_db_tables(app)
 
-    # reset_db_tables(app) # delete tables and fill with sample data
+    
 
     '''
     Set up CORS

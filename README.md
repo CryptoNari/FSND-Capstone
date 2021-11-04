@@ -20,6 +20,7 @@ Below are the skills taught in the courses summarized which are part of this fin
 
 
 # Install Project Key Dependencies
+The following instructions are based on a linux cli environment and can vary on different operating systems.
 
 ## Python
 Follow the instructions to install the latest version of python for your platform here: [docs](https://docs.python.org/3/using/unix.html#getting-and-installing-the-latest-version-of-python)
@@ -52,13 +53,48 @@ Deployment Service:
 - [Heroku](https://www.heroku.com/what)
 
 # Setup your local Postgres DBs
+You can follow the postgres [Documentation](https://www.postgresql.org/docs/14/tutorial-createdb.html)to set up your local database
+    -   Main DB
+    -   Test DB    
 Within the setup.sh file replace the Database Urls with your own Postgres Database Urls
-Run the setup.sh file to set the needed environment variables.
-Execute
+Run the setup.sh file to set the needed environment variables for the following steps.
+
+Execute:
 ```
 python manage.py db upgrade
 ```
 to setup the db models.
+
+# Authentification
+Due to a hard limit of the web_token expiry of 1 day(dee following [thread](https://community.auth0.com/t/how-to-change-the-access-token-expiry/10222/9)),
+it could be necessary to update the JWT Access tokens in the setup.sh file.
+
+Go to the 
+
+[Auth0 Login](https://fseduc.eu.auth0.com/authorize?audience=Capstone&response_type=token&client_id=bSgXoBEDSZqwv66BZJcU8TvzR71qaW3q&redirect_uri=https://127.0.0.1:8080/login-results)
+
+and use the following login credentials to get new valid tokens:
+
+Admin: capstoneadmin@fsnd.com PW: Capstone!2021
+User: capstoneuser@fsnd.com PW: Capstone!2021
+
+In the browser address line you get the a redirection with a new valid access token:
+
+https://127.0.0.1:8080/login-results#access_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InNCZ2MtOVdzcGxMaDJ3dFp3cVZfNCJ9.eyJpc3MiOiJodHRwczovL2ZzZWR1Yy5ldS5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjE4MTA4ZWNlM2M2MTgwMDZhYjhiY2Q4IiwiYXVkIjoiQ2Fwc3RvbmUiLCJpYXQiOjE2MzYwMTMwMjMsImV4cCI6MTYzNjA5OTQyMywiYXpwIjoiYlNnWG9CRURTWnF3djY2QlpKY1U4VHZ6UjcxcWFXM3EiLCJzY29wZSI6IiIsInBlcm1pc3Npb25zIjpbImRlbGV0ZTpkYXRhIiwicGF0Y2g6ZGF0YSIsInBvc3Q6ZGF0YSJdfQ.ZtwLF7KOyTexshxz8qStZCrVRemaPWlIIGE-h-CCQb4i8FQqImHNt-x5N9ck9COgUdJrHcho-0aaLf3LZYmXUwnHZnf5_VmMqIgEkR5GDxBiKd9SWk1Sul3yLMlx3-jaBkEWcuOnyHZm-S1xpbs3wWJU_kCTZFmPWbpiPLLGorrYkJZxN3zhYvzmKiAaR0ykQEc4aaAqCZrcgS5ENsqxvZCN485LfMjq3dl3B79hCGS-NbDP3XRNMbFr8YNEZEOyBzOsbf_0QOdEkmUro2_pbuIqeKPWLhKaMv3-1mGV4aU-L6oxBHOYymBYNqI8PSwzEuzwRYkWLjGnwnJnQf80DA&expires_in=86400&token_type=Bearer
+
+
+Copy the access token and replace it inside the setup.sh file.
+
+To logout a user use the following link:
+
+[Logout](https://fseduc.eu.auth0.com/v2/logout?client_id=bSgXoBEDSZqwv66BZJcU8TvzR71qaW3q&returnTo=https://127.0.0.1:8080/logout)
+
+# Execute Bash file with environment variables
+
+To setup the necessary environment variables execute:
+```
+source setup.sh
+```
 
 # Test Local Installation
 Run the following command from the root folder within your venv:
@@ -67,7 +103,7 @@ python tests/test_app.py
 ```
 Your local installation is set up correctly when all tests pass.
 
-# Run/Start the server
+# Run/Start the local dev server
 Run the following command from the root folder within your venv:
 ```
 python app.py
@@ -86,7 +122,7 @@ python app.py
 -  GET '/podcasts', '/speakers' and '/episodes'
 -  GET '/podcasts/<id>', '/speakers/<id>' and '/episodes/<id>'
 -  POST '/podcasts', '/speakers' and '/episodes'
--  DELETE '/podcasts/<id>', '/speakers/<id>' and '/episodes/<id>'
+-  PATCH '/podcasts/<id>', '/speakers/<id>' and '/episodes/<id>'
 -  DELETE '/podcasts/<id>', '/speakers/<id>' and '/episodes/<id>'
 
 ### Roles
@@ -95,7 +131,7 @@ python app.py
     -   All permissions from 'Registered User'
     -   Can update and delete db entries
 
--   Registered User:
+-   User:
     -   Can add and search db entries
 
 -   Everyone is able to proceed GET requests (no login necessary)
@@ -117,7 +153,8 @@ python app.py
 -   Deployment URL: https://fsnd-capstone2021.herokuapp.com/
 -   Local Hosted URL: The app is hosted at default  http://127.0.0.1:5000/
 
-Authentication....
+To successfully run the curl requests, Authentication tokens are provided in the setup.sh file
+If not already done, run the setup.sh file to set the environment variables.
 
 ### Error Handling
 
@@ -346,8 +383,10 @@ For local testin you have to replace it with the Local hosted Url.
     }
 }
 ```
+
 ##### search Podcast
-    - search in Podcasts for author and name
+
+- search in Podcasts for author and name
 
     Request data {
         'search'='Robert',  # String
@@ -399,6 +438,7 @@ For local testin you have to replace it with the Local hosted Url.
 
 - Authentification
     - needs Bearer Token with Authorization header 'post:data'
+
 - Sample:
     ```
     curl --request POST https://fsnd-capstone2021.herokuapp.com/speakers \
@@ -421,8 +461,10 @@ For local testin you have to replace it with the Local hosted Url.
     }
 }
 ```
+
 ##### search Speaker
-    - search in Speakers for Speaker name
+
+- search in Speakers for Speaker name
 
     Request data {
         'search'='Michael',  # String
@@ -430,6 +472,7 @@ For local testin you have to replace it with the Local hosted Url.
 
 - Authentification
     - needs Bearer Token with Authorization header 'post:data'
+
 - Sample:
     ```
     curl --request POST https://fsnd-capstone2021.herokuapp.com/speakers \
@@ -472,6 +515,7 @@ For local testin you have to replace it with the Local hosted Url.
 
 - Authentification
     - needs Bearer Token with Authorization header 'post:data'
+
 - Sample:
     ```
     curl --request POST https://fsnd-capstone2021.herokuapp.com/episodes \
@@ -496,8 +540,10 @@ For local testin you have to replace it with the Local hosted Url.
     }
 }
 ```
+
 ##### search Episodes
-    - search in Episodes for Episode title and topics
+
+- search in Episodes for Episode title and topics
 
     Request data {
         'search'='Ethereum',  # String
@@ -505,6 +551,7 @@ For local testin you have to replace it with the Local hosted Url.
 
 - Authentification
     - needs Bearer Token with Authorization header 'post:data'
+
 - Sample:
     ```
     curl --request POST https://fsnd-capstone2021.herokuapp.com/episodes \
@@ -558,6 +605,7 @@ For local testin you have to replace it with the Local hosted Url.
 
 - Authentification
     - needs Bearer Token with Authorization header 'patch:data'
+
 - Sample:
     ```
     curl --request PATCH https://fsnd-capstone2021.herokuapp.com/podcasts/19 \
@@ -596,6 +644,7 @@ For local testin you have to replace it with the Local hosted Url.
 
 - Authentification
     - needs Bearer Token with Authorization header 'patch:data'
+
 - Sample:
     ```
     curl --request PATCH https://fsnd-capstone2021.herokuapp.com/speakers/9 \
@@ -633,6 +682,7 @@ For local testin you have to replace it with the Local hosted Url.
 
 - Authentification
     - needs Bearer Token with Authorization header 'patch:data'
+
 - Sample:
     ```
     curl --request PATCH https://fsnd-capstone2021.herokuapp.com/episodes/13 \
@@ -662,6 +712,7 @@ For local testin you have to replace it with the Local hosted Url.
 
 - General:
     - DELETE podcast of given podcast id
+    - All depended Episodes has to be deleted first.
 
 - Authentification
     - needs Bearer Token with Authorization header 'delete:data'
@@ -683,6 +734,7 @@ For local testin you have to replace it with the Local hosted Url.
 
 - General:
     - Delete Speaker of given Speaker id
+    - All depended Episodes has to be deleted first.
 
 - Authentification
     - needs Bearer Token with Authorization header 'delete:data'
